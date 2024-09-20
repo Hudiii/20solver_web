@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flask Calculator</title>
+  <link rel="stylesheet" href="css/font.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="text-center bg-black text-white">
+  <div class="container min-h-screen flex-col justify-center align-center">
+    <div class="mt-20">
+      <h1 class="text-7xl font-bold">20 SOLVER</h1>
+    </div>
+    
+    <form id="calcForm" class="mt-10">
+      <label class="text-2xl">Enter four numbers:</label><br>
+  
+      <!-- Four input boxes for the operands -->
+      <div class="flex justify-center space-x-4 mt-3">
+        <input type="text" id="input1" class="w-16 py-3 text-center text-white text-2xl bg-[#808080] rounded-lg outline-none" maxlength="3" style="caret-color: white;" required>
+        <input type="text" id="input2" class="w-16 py-3 text-center text-white text-2xl bg-[#808080] rounded-lg outline-none" maxlength="3" style="caret-color: white;" required>
+        <input type="text" id="input3" class="w-16 py-3 text-center text-white text-2xl bg-[#808080] rounded-lg outline-none" maxlength="3" style="caret-color: white;" required>
+        <input type="text" id="input4" class="w-16 py-3 text-center text-white text-2xl bg-[#808080] rounded-lg outline-none" maxlength="3" style="caret-color: white;" required>
+      </div>
+  
+      <button type="submit" class="mt-5 border border-white px-5 py-2 rounded-lg hover:bg-white hover:text-black">Calculate</button>
+    </form>
+  
+    <h2 class="mt-10 text-2xl">Result:</h2>
+    <div id="total-result" class="text-xl"></div>
+    <div id="result" class="grid grid-cols-5 gap-6 mt-5 mx-20 mb-20"></div>
+  </div>
+
+  <script>
+    document.getElementById('calcForm').addEventListener('submit', async function(event) {
+      event.preventDefault();
+
+      const input1 = document.getElementById('input1').value.trim();
+      const input2 = document.getElementById('input2').value.trim();
+      const input3 = document.getElementById('input3').value.trim();
+      const input4 = document.getElementById('input4').value.trim();
+
+      const input = [input1, input2, input3, input4];
+
+      const response = await fetch('/calculate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ input: input })
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        const resultContainer = document.getElementById('result');
+        resultContainer.innerHTML = '';
+
+        if (result.result === "Solution not found!") {
+          document.getElementById('total-result').innerText = 'Solution not found!';
+        } else {
+          document.getElementById('total-result').innerText = `Total solutions found: ${result.total_solutions}`;
+
+          result.result.forEach(solution => {
+            const solutionDiv = document.createElement('div');
+            solutionDiv.classList.add('bg-gray-700', 'text-white', 'py-3', 'rounded-lg');
+            solutionDiv.innerText = solution.replace(/["]/g, '');
+            resultContainer.appendChild(solutionDiv);
+          });
+        }
+      } else {
+        document.getElementById('result').innerText = result.error;
+      }
+    });
+  </script>
+</body>
+</html>
